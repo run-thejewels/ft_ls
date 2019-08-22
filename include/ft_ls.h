@@ -7,8 +7,9 @@ typedef struct      s_filedata
 	uid_t          user_id;
 	gid_t          group_id;
 	off_t          size;
-	char           name[255];
+	char           *name;
 }                   t_filedata;
 
+int ft_ls(t_argdata *args);
 
 #endif

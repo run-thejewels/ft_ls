@@ -8,6 +8,7 @@
 # define F_TIME 4U
 # define F_L 8U
 # define F_ALL 16U
+# define OF_PRINT_DIR 32U
 
 
 typedef struct		s_argdata

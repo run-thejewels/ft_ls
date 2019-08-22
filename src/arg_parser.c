@@ -15,7 +15,6 @@ static unsigned            get_basic_flag(char c)
 		return (F_RECURSIVE);
 	else if (c == 'a')
 		return (F_ALL);
-
 	return (0);
 }
 
@@ -25,18 +24,18 @@ static unsigned            get_flags(char *str)
 {
 	unsigned    res;
 	unsigned    tmp;
-	size_t cur;
+	size_t		cur;
 
 	cur = 0;
 	res = 0;
 	while (str[cur] != '\0')
 	{
 		if (!(tmp = get_basic_flag(str[cur])))
-			raise_error("ls: illegal option -- %c\n", 2, str[cur]);
+			raise_error("ls: illegal option -- %c\n", 2,
+					str[cur]);
 		res |= tmp;
 		cur++;
 	}
-
 	return (res);
 }
 
@@ -48,15 +47,17 @@ t_argdata           *arg_parser(int argc, char **argv)
 	res = malloc(sizeof(t_argdata));
 	res->dirs = ft_lstinit();
 	cur_arg = 1;
-
 	while (cur_arg < argc)
 	{
 		if (argv[cur_arg][0] == '-')
 			res->flags |= get_flags(argv[cur_arg] + 1);
 		else
-			ft_lstaddend(res->dirs, ft_lstnew_node(argv[cur_arg], ft_strlen
-			(argv[cur_arg]) + 1));
+			ft_lstaddend(res->dirs, ft_lstnew_node(argv[cur_arg],
+					ft_strlen(argv[cur_arg]) + 1));
 		cur_arg++;
 	}
+	res->flags |= res->dirs->len > 1 || F_RECURSIVE ? OF_PRINT_DIR : 0;
+	if (res->dirs->len == 0)
+		ft_lstaddend(res->dirs, ft_lstnew_node(".", 2));
 	return (res);
 }
