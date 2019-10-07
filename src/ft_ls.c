@@ -16,7 +16,7 @@
 #include "arg_parser.h"
 #include "ft_ls.h"
 #include "ft_printf.h"
-
+/*
 t_argdata *G_ARGS;
 
 char *get_mode_string(mode_t mode)
@@ -59,19 +59,57 @@ char *get_name_by_gid(int gid)
 
 void print_line(t_filedata *data)
 {
-	ft_printf("%s %10s %10s %10ld %s\n",
-			  get_mode_string(data->premissions),
-			  get_name_by_uid(data->user_id),
-			  get_name_by_gid(data->group_id),
-			  data->size,
-			  data->name);
+	if (G_ARGS->flags & F_L)
+		ft_printf("%s %10s %10s %10ld %s\n",
+				get_mode_string(data->premissions),
+				get_name_by_uid(data->user_id),
+				get_name_by_gid(data->group_id),
+				data->size,
+				data->name);
+	else
+		ft_printf("%s ", data->name);
+}
+
+char *create_path(char *l, char *r)
+{
+	size_t l1, l2;
+	l1 = strlen(l);
+	l2 = strlen(r);
+	char *res = malloc(l1 + l2 + 2);
+	memcpy(res, l, l1);
+	res[l1] = '/';
+	memcpy(res + l1 + 1, r, l2);
+	res[l1 + l2 + 1] = 0;
+	return (res);
 }
 
 
-int recursive_ls(t_list_node *node)
+int recursive_ls(t_list_node *node, char *rel_path)
 {
-	print_line((t_filedata *)(node->content));
-	return (0);
+	if (!S_ISDIR(((t_filedata *)(node->content))->premissions))
+	{
+		print_line((t_filedata *)(node->content));
+		return 0;
+	}
+
+	char *dir_path = create_path(rel_path, ((t_filedata *)(node->content))
+	->name);
+
+	DIR *dir = opendir(dir_path);
+
+	struct dirent *res;
+	struct stat buff;
+	char *tmp;
+	errno = 0;
+	while ((res = readdir(dir)))
+	{
+		tmp = create_path(path, res->d_name);
+	}
+
+	return 0;
+
+
+
 }
 
 int ls_iterative(t_list_node *node)
@@ -95,10 +133,6 @@ void	fill_data(t_filedata *d, struct stat *data)
 
 int	get_files_data(t_list *files_list, t_list *target_list)
 {
-	struct stat buff;
-	t_list_node *cur;
-	t_filedata tmp;
-
 	cur = target_list->begin;
 	while (cur)
 	{
@@ -120,6 +154,7 @@ int ft_ls(t_argdata *args)
     t_list_node *cur;
     int 		res;
 
+    G_ARGS = args;
     files_list.begin = NULL;
     files_list.end = NULL;
     files_list.len = 0;
@@ -133,4 +168,4 @@ int ft_ls(t_argdata *args)
 
 
 
-
+*/

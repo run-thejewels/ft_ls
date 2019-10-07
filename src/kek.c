@@ -1,4 +1,4 @@
-/*#include <sys/types.h>
+#include <sys/types.h>
 #include <dirent.h>
 
 #include <sys/stat.h>
@@ -77,7 +77,7 @@ char *create_path(char *l, char *r)
 
 void print_line(struct dirent *res, struct stat *buff)
 {
-    printf("%s %10s %10s %10ld %s\n",
+    printf("%s %10s %10s %10lld %s\n",
            get_mode_string(buff->st_mode),
            get_name_by_uid(buff->st_uid),
            get_name_by_gid(buff->st_gid),
@@ -96,8 +96,6 @@ int     print_single(DIR *d, char *path, char r)
         if (res->d_type == DT_REG || res->d_type == DT_DIR)
         {
             tmp = create_path(path, res->d_name);
-            if (lstat(tmp, &buff) == -1)
-                return (-1);
             print_line(res, &buff);
             print_single(d, path, r);
             if (r && res->d_type == DT_DIR && strcmp("..", res->d_name) != 0 &&
@@ -122,15 +120,4 @@ int 	not_ft_ls(char *path, char R)
 	char *cur_path = path;
 
 	print_single(kek, cur_path, R);
-}
-*/
-
-
-
-int ft_ls()
-{
-	int res;
-
-	res = 0;
-	return (res);
 }
