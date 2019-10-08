@@ -15,6 +15,52 @@
 char 		*create_path(char *l, char *r);
 void		raise_error(const char *msg, char fatal);
 
+void		print_file(t_filedata *file, uint32_t flags)
+{
+	//TODO: IMPLEMENT CORRECTLY
+	flags++;
+	printf("%s\n", file->name);
+}
+
+void		print_files(t_list *files_list, uint32_t flags)
+{
+	//TODO: IMPLEMENT CORRECTLY
+	t_list_node	*cur;
+	flags++;
+	cur = files_list->begin;
+	while (cur)
+	{
+		printf("%s\n", ((t_filedata *)(cur->content))->name);
+		cur = cur->next;
+	}
+}
+
+void		sort_files(t_list *files_list, uint32_t flags)
+{
+	//TODO: IMPLEMENT
+	(void)files_list;
+	flags++;
+}
+
+void		free_fileslst(t_list *flist)
+{
+	t_list_node	*cur;
+	t_list_node	*tmp;
+	t_filedata	*content;
+
+	cur = flist->begin;
+	while (cur)
+	{
+		content = cur->content;
+		tmp = cur->next;
+		free(content->name);
+		free(content);
+		free(cur);
+		cur = tmp;
+	}
+	free(flist);
+}
+
 void		fill_data(t_filedata *dst, struct stat *buff, char *name)
 {
 	dst->name = ft_strdup(name);
@@ -36,6 +82,8 @@ t_list_node	*create_filenode(char *path, char *name)
 		raise_error("Cannot read file!!!\n", 0);
 		return (NULL);
 	}
+	if (tmp_str != name)
+		free(tmp_str);
 	res = ft_memalloc(sizeof(t_list_node));
 	res->content_size = sizeof(t_filedata);
 	res->content = malloc(sizeof(t_filedata));
@@ -58,7 +106,8 @@ t_list		*get_files_in_dir(char *path, uint32_t flags)
 	files_list = ft_lstinit();
 	while ((cur_file = readdir(dir)))
 	{
-		if ((tmp_node = create_filenode(path, cur_file->d_name)))
+		if ((cur_file->d_name[0] != '.' || flags & F_ALL) &&
+			(tmp_node = create_filenode(path, cur_file->d_name)))
 			ft_lstadd(files_list, tmp_node);
 	}
 	if (errno != 0)
@@ -69,24 +118,6 @@ t_list		*get_files_in_dir(char *path, uint32_t flags)
 	closedir(dir);
 	return (files_list);
 }
-
-void		print_file(t_filedata *file)
-{
-	printf("%s\n", file->name);
-}
-
-void		print_files(t_list *files_list)
-{
-	t_list_node	*cur;
-
-	cur = files_list->begin;
-	while (cur)
-	{
-		print_file(cur->content);
-		cur = cur->next;
-	}
-}
-
 
 t_list		*get_files_by_name(t_list *filenames)
 {
@@ -103,6 +134,32 @@ t_list		*get_files_by_name(t_list *filenames)
 	return (res);
 }
 
+void		ft_ls_recursive(char *path, t_filedata *file, uint32_t flags)
+{
+	t_list	*files;
+	char	*path_to_dir;
+	t_list_node	*cur_file;
+	t_filedata	*tmp;
+
+	path_to_dir = path[0] ? create_path(path, file->name) : file->name;
+	files = get_files_in_dir(path_to_dir, flags);
+	sort_files(files, flags);
+	printf("%s:\n", path_to_dir);
+	print_files(files, flags);
+	printf("\n");
+	cur_file = files->begin;
+	while (cur_file)
+	{
+		tmp = cur_file->content;
+		if (flags & F_RECURSIVE && tmp->premissions & (uint32_t)S_IFDIR && ft_strcmp(tmp->name, ".") && ft_strcmp(tmp->name, ".."))
+			ft_ls_recursive(path_to_dir, tmp, flags);
+		cur_file = cur_file->next;
+	}
+	free_fileslst(files);
+	if (path_to_dir != file->name)
+		free(path_to_dir);
+}
+
 int 		ft_ls(t_argdata	*args)
 {
 	t_list	*files;
@@ -110,20 +167,17 @@ int 		ft_ls(t_argdata	*args)
 	t_filedata	*tmp;
 
 	files = get_files_by_name(args->dirs);
+	sort_files(files, args->flags);
 	cur_file_name = files->begin;
 	while (cur_file_name)
 	{
 		tmp = cur_file_name->content;
-		if (!(tmp->premissions & S_IFDIR))
-			print_file(tmp);
+		if (!(tmp->premissions & (uint32_t)S_IFDIR))
+			print_file(tmp, args->flags);
 		else
-		{
-			files = get_files_in_dir(tmp->name, args->flags);
-			if (args->dirs->len > 1 || args->flags & F_RECURSIVE)
-				printf("%s:\n", tmp->name);
-			print_files(files);
-		}
+			ft_ls_recursive("", tmp, args->flags);
 		cur_file_name = cur_file_name->next;
 	}
-	return (0);
+	free_fileslst(files);
+	return (errno ? 1 : 0);
 }

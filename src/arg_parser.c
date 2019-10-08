@@ -22,9 +22,9 @@ static unsigned            get_basic_flag(char c)
 static void	raise_error(const char *msg, int code, const char opt)
 {
 	if (opt)
-		printf(2, msg, opt);
+		dprintf(2, msg, opt);
 	else
-		printf(2, msg);
+		dprintf(2, "%s", msg);
 	exit(code);
 }
 
@@ -54,6 +54,7 @@ t_argdata           *arg_parser(int argc, char **argv)
 
 	res = malloc(sizeof(t_argdata));
 	res->dirs = ft_lstinit();
+	res->flags = 0;
 	cur_arg = 1;
 	while (cur_arg < argc)
 	{
