@@ -1,6 +1,7 @@
 #include "arg_parser.h"
 #include "ft_list.h"
 #include "ft_string.h"
+#include <stdio.h>
 
 static unsigned            get_basic_flag(char c)
 {
@@ -18,7 +19,14 @@ static unsigned            get_basic_flag(char c)
 	return (0);
 }
 
-void	raise_error(const char *msg, int code, const char opt);
+static void	raise_error(const char *msg, int code, const char opt)
+{
+	if (opt)
+		printf(2, msg, opt);
+	else
+		printf(2, msg);
+	exit(code);
+}
 
 static unsigned            get_flags(char *str)
 {
