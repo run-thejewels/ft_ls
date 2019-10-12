@@ -65,7 +65,6 @@ t_argdata           *arg_parser(int argc, char **argv)
 					ft_strlen(argv[cur_arg]) + 1));
 		cur_arg++;
 	}
-	res->flags |= res->dirs->len > 1 || F_RECURSIVE ? OF_PRINT_DIR : 0;
 	if (res->dirs->len == 0)
 		ft_lstaddend(res->dirs, ft_lstnew_node(".", 2));
 	return (res);

@@ -1,95 +1,67 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_ls.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jleann <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/10/09 12:24:00 by jleann            #+#    #+#             */
+/*   Updated: 2019/10/09 12:24:03 by jleann           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "arg_parser.h"
-
-
 #include <stdint.h>
 #include <dirent.h>
 #include <sys/stat.h>
-
-
 #include <stdio.h>
 #include <ft_ls.h>
 #include <libft.h>
 #include <errno.h>
 
-
-char 		*create_path(char *l, char *r);
+char		*create_path(char *l, char *r);
 void		raise_error(const char *msg, char fatal);
+void		sort_files(t_list *files_list, uint32_t flags);
+
+int			is_dirs_in_lst(t_list *lst)
+{
+	t_list_node	*cur;
+	t_filedata	*tmp;
+
+	cur = lst->begin;
+	while (cur)
+	{
+		tmp = cur->content;
+		if (tmp->premissions & (uint32_t)S_IFDIR)
+			return (1);
+		cur = cur->next;
+	}
+	return (0);
+}
+
+int			is_print_dir(t_list *lst)
+{
+	return (lst->len > 1 && is_dirs_in_lst(lst));
+}
 
 void		print_file(t_filedata *file, uint32_t flags)
 {
-	//TODO: IMPLEMENT CORRECTLY
 	flags++;
-	printf("%s\n", file->name);
+	printf("%s ", file->name);
 }
 
 void		print_files(t_list *files_list, uint32_t flags)
 {
-	//TODO: IMPLEMENT CORRECTLY
 	t_list_node	*cur;
+
 	flags++;
 	cur = files_list->begin;
 	while (cur)
 	{
-		printf("%s\n", ((t_filedata *)(cur->content))->name);
+		printf("%s ", ((t_filedata *)(cur->content))->name);
 		cur = cur->next;
 	}
-}
-
-void        swap_nodes(t_list *lst, t_list_node *l, t_list_node *r)
-{
-
-    if (l->prev)
-        l->prev->next = r;
-    else
-        lst->begin = r;
-    if (r->next)
-        r->next->prev = l;
-    else
-        lst->end = l;
-    l->next = r->next;
-    r->next = l;
-    r->prev = l ->prev;
-    l->prev = r;
-}
-int         time_sort(t_filedata *a, t_filedata *b)
-{
-
-}
-
-int         size_sort(t_filedata *a, t_filedata *b)
-{
-    return ((int)(b->size - a->size));
-}
-
-int         name_sort(t_filedata *a, t_filedata *b)
-{
-    return(ft_strcmp(a->name, b->name));
-}
-
-void		lst_sort(t_list *files_list,int (*f)(void *, void *), char rev)
-{
-    t_list_node *tmp;
-    t_list_node *pmt;
-
-    tmp = files_list->end;
-    while (tmp) {
-        pmt = files_list->begin;
-        while (pmt->next) {
-            if (f(pmt->content, pmt->next->content) * (rev ? -1 : 1) > 0)
-                swap_nodes(files_list, pmt, pmt->next);
-            else
-                pmt = pmt->next;
-        }
-        tmp = tmp->prev;
-    }
-}
-void        sort_files(t_list *files_list, uint32_t flags)
-{
-    lst_sort(files_list, name_sort, flags & F_REVERSE);
-//    if (flags & F_TIME)
-//        lst_sort(files_list, time_sort, flags & F_REVERSE);
-    if (flags & F_TIME)
-        lst_sort(files_list, size_sort, flags & F_REVERSE);
+	printf("\n");
 }
 
 void		free_fileslst(t_list *flist)
@@ -118,6 +90,10 @@ void		fill_data(t_filedata *dst, struct stat *buff, char *name)
 	dst->user_id = buff->st_uid;
 	dst->premissions = buff->st_mode;
 	dst->size = buff->st_size;
+	dst->h_links = buff->st_nlink;
+	dst->atime = buff->st_atimespec;
+	dst->mtime = buff->st_mtimespec;
+	dst->ctime = buff->st_ctimespec;
 }
 
 t_list_node	*create_filenode(char *path, char *name)
@@ -171,14 +147,14 @@ t_list		*get_files_in_dir(char *path, uint32_t flags)
 
 t_list		*get_files_by_name(t_list *filenames)
 {
-	t_list	*res;
+	t_list		*res;
 	t_list_node	*cur_fname;
 
 	res = ft_lstinit();
 	cur_fname = filenames->begin;
 	while (cur_fname)
 	{
-		ft_lstadd(res, create_filenode("",cur_fname->content));
+		ft_lstadd(res, create_filenode("", cur_fname->content));
 		cur_fname = cur_fname->next;
 	}
 	return (res);
@@ -186,37 +162,43 @@ t_list		*get_files_by_name(t_list *filenames)
 
 void		ft_ls_recursive(char *path, t_filedata *file, uint32_t flags)
 {
-	t_list	*files;
-	char	*path_to_dir;
+	t_list		*files;
+	char		*path_to_dir;
 	t_list_node	*cur_file;
 	t_filedata	*tmp;
 
 	path_to_dir = path[0] ? create_path(path, file->name) : file->name;
 	files = get_files_in_dir(path_to_dir, flags);
-	sort_files(files, flags);
-	printf("%s:\n", path_to_dir);
-	print_files(files, flags);
-	printf("\n");
-	cur_file = files->begin;
-	while (cur_file)
+	if (files)
 	{
-		tmp = cur_file->content;
-		if (flags & F_RECURSIVE && tmp->premissions & (uint32_t)S_IFDIR && ft_strcmp(tmp->name, ".") && ft_strcmp(tmp->name, ".."))
-			ft_ls_recursive(path_to_dir, tmp, flags);
-		cur_file = cur_file->next;
+		sort_files(files, flags);
+		print_files(files, flags);
+		cur_file = files->begin;
+		while (cur_file)
+		{
+			tmp = cur_file->content;
+			if (flags & F_RECURSIVE && tmp->premissions & (uint32_t)S_IFDIR &&
+				ft_strcmp(tmp->name, ".") && ft_strcmp(tmp->name, ".."))
+			{
+				printf("%s:\n", path_to_dir);
+				ft_ls_recursive(path_to_dir, tmp, flags);
+			}
+			cur_file = cur_file->next;
+		}
+		free_fileslst(files);
 	}
-	free_fileslst(files);
 	if (path_to_dir != file->name)
 		free(path_to_dir);
 }
 
-int 		ft_ls(t_argdata	*args)
+int			ft_ls(t_argdata *args)
 {
-	t_list	*files;
-	t_list_node	*cur_file_name;
-	t_filedata	*tmp;
+	t_list			*files;
+	t_list_node		*cur_file_name;
+	t_filedata		*tmp;
 
 	files = get_files_by_name(args->dirs);
+	args->flags |= is_print_dir(files) ? OF_PRINT_DIR : 0;
 	sort_files(files, args->flags);
 	cur_file_name = files->begin;
 	while (cur_file_name)
@@ -225,7 +207,11 @@ int 		ft_ls(t_argdata	*args)
 		if (!(tmp->premissions & (uint32_t)S_IFDIR))
 			print_file(tmp, args->flags);
 		else
+		{
+			if (args->flags & OF_PRINT_DIR)
+				printf("%s:\n", tmp->name);
 			ft_ls_recursive("", tmp, args->flags);
+		}
 		cur_file_name = cur_file_name->next;
 	}
 	free_fileslst(files);

@@ -1,8 +1,6 @@
 
-#include "ft_printf.h"
 #include "arg_parser.h"
 #include "ft_ls.h"
-
 
 void	free_args(t_argdata *data)
 {
@@ -14,13 +12,11 @@ void	free_args(t_argdata *data)
 	free(data);
 	while (cur)
 	{
-
 		tmp = cur->next;
 		free(cur->content);
 		free(cur);
 		cur = tmp;
 	}
-
 }
 
 int main(int argc, char **argv)

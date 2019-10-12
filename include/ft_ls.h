@@ -1,6 +1,9 @@
 #ifndef FT_LS_H
 #define FT_LS_H
 
+#include "arg_parser.h"
+#include "sys/stat.h"
+
 typedef struct      s_filedata
 {
 	mode_t			premissions;
@@ -8,7 +11,10 @@ typedef struct      s_filedata
 	gid_t			group_id;
 	off_t			size;
 	char			*name;
-	dev_t			d_type;
+	nlink_t			h_links;
+	struct timespec	mtime;
+	struct timespec atime;
+	struct timespec	ctime;
 }                   t_filedata;
 
 int ft_ls(t_argdata *args);
