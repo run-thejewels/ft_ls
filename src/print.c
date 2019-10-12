@@ -17,34 +17,55 @@
 #include <pwd.h>
 #include <grp.h>
 
+#include <time.h>
+#include "ft_printf.h"
+
+static char firts_char(mode_t mode)
+{
+    if (S_ISDIR(mode))
+        return ('d');
+    else if (S_ISBLK(mode))
+        return ('b');
+    else if (S_ISCHR(mode))
+        return('c');
+    else if (S_ISLNK(mode))
+        return ('l');
+    else if (S_ISSOCK(mode))
+        return ('s');
+    else if(S_ISFIFO(mode))
+        return ('p');
+    else
+        return ('-');
+}
+
+// static char therd_char(mode_t mode)
+// {
+//
+// }
+
 static char *get_mode_string(mode_t mode)
 {
-	char *res;
+    char *res;
 
-	res = malloc(11);
-	if (S_ISDIR(mode))
-		res[0] = 'd';
-	else if (S_ISBLK(mode))
-		res[0] = 'b';
-	else if (S_ISCHR(mode))
-		res[0] = 'c';
-	else if (S_ISLNK(mode))
-		res[0] = 'l';
-	else if (S_ISSOCK(mode))
-		res[0] = 's';
-	else
-		res[0] = mode & S_IFIFO ? 'p' : '-';
-	res[1] = mode & S_IRUSR ? 'r' : '-';
-	res[2] = mode & S_IWUSR ? 'w' : '-';
-	res[3] = mode & S_IXUSR ? 'x' : '-';
-	res[4] = mode & S_IRGRP ? 'r' : '-';
-	res[5] = mode & S_IWGRP ? 'w' : '-';
-	res[6] = mode & S_IXGRP ? 'x' : '-';
-	res[7] = mode & S_IROTH ? 'r' : '-';
-	res[8] = mode & S_IWOTH ? 'w' : '-';
-	res[9] = mode & S_IXOTH ? 'x' : '-';
-	res[10] = '\0';
-	return res;
+    res = malloc(11);
+    res[0] = firts_char(mode);
+    res[1] = mode & S_IRUSR ? 'r' : '-';
+    res[2] = mode & S_IWUSR ? 'w' : '-';
+    res[3] = mode & S_IXUSR ? 'x' : '-';
+    res[4] = mode & S_IRGRP ? 'r' : '-';
+    res[5] = mode & S_IWGRP ? 'w' : '-';
+    res[6] = mode & S_IXGRP ? 'x' : '-';
+    res[7] = mode & S_IROTH ? 'r' : '-';
+    res[8] = mode & S_IWOTH ? 'w' : '-';
+    res[9] = mode & S_IXOTH ? 'x' : '-';
+    if (mode & S_IFLNK)
+    {
+        res[10] = '@';
+        res[11] = '\0';
+    }
+    else
+        res[10] = '\0';
+    return res;
 }
 
 static char *get_name_by_uid(uid_t uid)
@@ -65,6 +86,12 @@ static char *get_name_by_gid(gid_t gid)
 		return strdup("");
 }
 
+//static char *get_name_by_time(struct timespec mtime)
+//{
+//    if (mtime.tv_sec)
+//        ctime(ctime(mtime.tv_sec);
+//}
+
 void print_line(t_list_node *s, t_par *p)
 {
 	t_filedata *pr;
@@ -72,11 +99,16 @@ void print_line(t_list_node *s, t_par *p)
 	while (s)
 	{
 		pr = s->content;
-		printf("%s 0 %*s %*s %*lld %s\n",
-			   get_mode_string(pr->premissions), p->u_par,
-			   pr->u_name, p->g_par, pr->g_name, p->s_par,
-			   pr->size,
-			   pr->name);
+        if (S_ISLNK(pr->premissions))
+        {
+            ft_printf("%-*s %*d %-*s  %-*s  %*lld %.24s %s -> %s\n", p->p_par, pr->p_str,
+                   p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
+                   pr->g_name, p->s_par, pr->size, ctime(&pr->mtime.tv_sec), pr->name, pr->l_name);
+        }
+        else
+		    ft_printf("%-*s %*d %-*s  %-*s  %*lld %.24s %s\n", p->p_par, pr->p_str,
+			   p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
+			   pr->g_name, p->s_par, pr->size, ctime(&pr->mtime.tv_sec), pr->name);
 		s = s->next;
 	}
 }
@@ -86,10 +118,10 @@ void		print_file(t_filedata *file, uint32_t flags)
 	printf("%s ", file->name);
 }
 
-int         sizelen(off_t s)
+int         sizelen(long s)
 {
 	int i;
-	int k;
+	long k;
 
 	i = 1;
 	k = 1;
@@ -98,6 +130,7 @@ int         sizelen(off_t s)
 		k *= 10;
 		i++;
 	}
+
 	return (i);
 }
 
@@ -109,17 +142,22 @@ void		print_files(t_list *files_list, uint32_t flags)
 	t_par       *par;
 
 	cur = files_list->begin;
-	par = (t_par *)malloc(sizeof(par));
-	par->u_par = 0;
-	par->g_par = 0;
-	par->s_par = 0;
+	par = ft_memalloc(sizeof(t_par));
 	if (flags & F_L)
 	{
+		s = 0;
 		while (cur)
 		{
 			fil = cur->content;
+			fil->p_str = get_mode_string(fil->premissions);
+			if (S_ISLNK(fil->premissions))
+			    fil->l_name = ft_strdup("KEK");
 			fil->u_name = get_name_by_uid(fil->user_id);
 			fil->g_name = get_name_by_gid(fil->group_id);
+			if (ft_strlen(fil->p_str) > par->p_par)
+				par->p_par = ft_strlen(fil->p_str);
+			if (sizelen(fil->h_links) > par->h_par)
+				par->h_par = sizelen(fil->h_links);
 			if (ft_strlen(fil->u_name) > par->u_par)
 				par->u_par = ft_strlen(fil->u_name);
 			if (ft_strlen(fil->g_name) > par->g_par)
@@ -133,6 +171,7 @@ void		print_files(t_list *files_list, uint32_t flags)
 		printf("total %lld\n", s);
 		cur = files_list->begin;
 		print_line(cur, par);
+		free(par);
 	}
 	else
 		while (cur)

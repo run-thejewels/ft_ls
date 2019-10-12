@@ -13,6 +13,9 @@ typedef struct      s_filedata
 	char			*name;
 	char            *u_name;
 	char            *g_name;
+	char            *l_name;
+	char            *p_str;
+	char            *t_name;
 	nlink_t			h_links;
 	struct timespec	mtime;
 	struct timespec atime;
@@ -22,6 +25,8 @@ typedef struct      s_filedata
 
 typedef struct 			s_par
 {
+    int             p_par;
+    int             h_par;
 	int 			u_par;
 	int				g_par;
 	int 			s_par;
