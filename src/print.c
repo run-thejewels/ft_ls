@@ -103,7 +103,6 @@ int         sizelen(off_t s)
 
 void		print_files(t_list *files_list, uint32_t flags)
 {
-	//TODO: IMPLEMENT CORRECTLY
 	off_t 			s;
 	t_list_node	*cur;
 	t_filedata	*fil;
