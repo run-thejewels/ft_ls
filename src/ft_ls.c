@@ -44,25 +44,8 @@ int			is_print_dir(t_list *lst)
 	return (lst->len > 1 && is_dirs_in_lst(lst));
 }
 
-void		print_file(t_filedata *file, uint32_t flags)
-{
-	flags++;
-	printf("%s ", file->name);
-}
-
-void		print_files(t_list *files_list, uint32_t flags)
-{
-	t_list_node	*cur;
-
-	flags++;
-	cur = files_list->begin;
-	while (cur)
-	{
-		printf("%s ", ((t_filedata *)(cur->content))->name);
-		cur = cur->next;
-	}
-	printf("\n");
-}
+void		print_file(t_filedata *file, uint32_t flags);
+void		print_files(t_list *files_list, uint32_t flags);
 
 void		free_fileslst(t_list *flist)
 {
