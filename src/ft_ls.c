@@ -73,6 +73,7 @@ void		fill_data(t_filedata *dst, struct stat *buff, char *name)
 	dst->user_id = buff->st_uid;
 	dst->premissions = buff->st_mode;
 	dst->size = buff->st_size;
+	dst->blocks = buff->st_blocks;
 	dst->h_links = buff->st_nlink;
 	dst->atime = buff->st_atimespec;
 	dst->mtime = buff->st_mtimespec;

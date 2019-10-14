@@ -18,6 +18,7 @@
 #include <grp.h>
 
 #include <time.h>
+#include <limits.h>
 #include "ft_printf.h"
 
 static char firts_char(mode_t mode)
@@ -86,29 +87,39 @@ static char *get_name_by_gid(gid_t gid)
 		return strdup("");
 }
 
-//static char *get_name_by_time(struct timespec mtime)
-//{
-//    if (mtime.tv_sec)
-//        ctime(ctime(mtime.tv_sec);
-//}
+static char *get_name_by_time(t_filedata *s)
+{
+    char    *a;
+
+    a = ctime(&(s->mtime.tv_sec)) + 4;
+    return (a);
+
+}
 
 void print_line(t_list_node *s, t_par *p)
 {
 	t_filedata *pr;
+	time_t     now;
+	int        i;
 
+	now = time (NULL);
 	while (s)
-	{
+    {
 		pr = s->content;
+        if (now - pr->mtime.tv_sec > 15811200)
+            i = 16;
+        else
+            i = 8;
         if (S_ISLNK(pr->premissions))
         {
-            ft_printf("%-*s %*d %-*s  %-*s  %*lld %.24s %s -> %s\n", p->p_par, pr->p_str,
+            ft_printf("%-*s %*d %-*s  %-*s  %*lld %.7s %.4s %s -> %s\n", p->p_par, pr->p_str,
                    p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
-                   pr->g_name, p->s_par, pr->size, ctime(&pr->mtime.tv_sec), pr->name, pr->l_name);
+                   pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name, pr->l_name);
         }
         else
-		    ft_printf("%-*s %*d %-*s  %-*s  %*lld %.24s %s\n", p->p_par, pr->p_str,
+		    ft_printf("%-*s %*d %-*s  %-*s  %*lld %.7s %.4s %s\n", p->p_par, pr->p_str,
 			   p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
-			   pr->g_name, p->s_par, pr->size, ctime(&pr->mtime.tv_sec), pr->name);
+			   pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name);
 		s = s->next;
 	}
 }
@@ -140,20 +151,27 @@ void		print_files(t_list *files_list, uint32_t flags)
 	t_list_node	*cur;
 	t_filedata	*fil;
 	t_par       *par;
+	quad_t      bl;
+
 
 	cur = files_list->begin;
 	par = ft_memalloc(sizeof(t_par));
 	if (flags & F_L)
 	{
 		s = 0;
+		bl = 0;
 		while (cur)
 		{
 			fil = cur->content;
 			fil->p_str = get_mode_string(fil->premissions);
 			if (S_ISLNK(fil->premissions))
-			    fil->l_name = ft_strdup("KEK");
+            {
+
+                readlink(fil->name, fil->l_name, NAME_MAX);
+            }
 			fil->u_name = get_name_by_uid(fil->user_id);
 			fil->g_name = get_name_by_gid(fil->group_id);
+			fil->t_name = get_name_by_time(fil);
 			if (ft_strlen(fil->p_str) > par->p_par)
 				par->p_par = ft_strlen(fil->p_str);
 			if (sizelen(fil->h_links) > par->h_par)
@@ -164,13 +182,16 @@ void		print_files(t_list *files_list, uint32_t flags)
 				par->g_par = ft_strlen(fil->g_name);
 			if (sizelen(fil->size) > par->s_par)
 				par->s_par = sizelen(fil->size);
-			s += fil->size;
+			if (S_ISDIR(fil->premissions))
+			    bl += fil->blocks;
+			else
+			    s += fil->size;
 			cur = cur->next;
 		}
 		s = s / 512 + (s % 512 != 0);
+		s += bl;
 		printf("total %lld\n", s);
-		cur = files_list->begin;
-		print_line(cur, par);
+		print_line(files_list->begin, par);
 		free(par);
 	}
 	else

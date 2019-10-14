@@ -1,6 +1,7 @@
 #ifndef FT_LS_H
 #define FT_LS_H
 
+#include <ntsid.h>
 #include "arg_parser.h"
 #include "sys/stat.h"
 
@@ -10,6 +11,7 @@ typedef struct      s_filedata
 	uid_t			user_id;
 	gid_t			group_id;
 	off_t			size;
+	quad_t          blocks;
 	char			*name;
 	char            *u_name;
 	char            *g_name;
