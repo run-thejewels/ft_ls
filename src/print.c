@@ -20,6 +20,8 @@
 #include <time.h>
 #include <limits.h>
 #include <sys/xattr.h>
+#include <sys/acl.h>
+#include <ft_string.h>
 #include "ft_printf.h"
 
 static char firts_char(mode_t mode)
@@ -50,11 +52,24 @@ static char firts_char(mode_t mode)
          res[3] = res[3] == '-' ? 'S' : 's';
  }
 
+ static void attr_res10(t_filedata *f, char *res)
+ {
+    char *path;
+
+    path = create_path(f->path, f->name);
+     if (listxattr(path, NULL , 0, XATTR_NOFOLLOW))
+         res[10] = '@';
+     else if (acl_get_file(path, ACL_TYPE_EXTENDED) != NULL)
+         res[10] = '+';
+     else
+         res[10] = ' ';
+ }
+
 static char *get_mode_string(t_filedata *f)
 {
     char *res;
 
-    res = malloc(11);
+    res = malloc(12);
     res[0] = firts_char(f->premissions);
     res[1] = f->premissions & S_IRUSR ? 'r' : '-';
     res[2] = f->premissions & S_IWUSR ? 'w' : '-';
@@ -66,13 +81,8 @@ static char *get_mode_string(t_filedata *f)
     res[8] = f->premissions & S_IWOTH ? 'w' : '-';
     res[9] = f->premissions & S_IXOTH ? 'x' : '-';
     sst_char(f->premissions, res);
-    if (listxattr(f->name, NULL , 0, XATTR_NOFOLLOW))
-    {
-        res[10] = '@';
-        res[11] = '\0';
-    }
-    else
-        res[10] = '\0';
+    attr_res10;
+    res[11] = '\0';
     return res;
 }
 
@@ -120,12 +130,12 @@ void print_line(t_list_node *s, t_par *p)
             i = 7;
         if (S_ISLNK(pr->premissions))
         {
-            ft_printf("%-*s %*d %-*s  %-*s  %*lld %.7s%1.5s %s -> %s\n", p->p_par, pr->p_str,
+            ft_printf("%s%*d %-*s  %-*s  %*lld %.7s%1.5s %s -> %s\n", pr->p_str,
                    p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
                    pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name, pr->l_name);
         }
         else
-		    ft_printf("%-*s %*d %-*s  %-*s  %*lld %.7s%1.5s %s\n", p->p_par, pr->p_str,
+		    ft_printf("%s%*d %-*s  %-*s  %*lld %.7s%1.5s %s\n", pr->p_str,
 			   p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
 			   pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name);
 		s = s->next;
@@ -174,13 +184,11 @@ void		print_files(t_list *files_list, uint32_t flags)
 			fil->p_str = get_mode_string(fil);
 			if (S_ISLNK(fil->premissions))
             {
-
-                readlink(fil->name, fil->l_name, 255);
+			    fil->l_name = (char*)malloc(fil->size + 1);
+                readlink(create_path(fil->path, fil->name), fil->l_name, fil->size);
             }
 			fil->u_name = get_name_by_uid(fil->user_id);
 			fil->g_name = get_name_by_gid(fil->group_id);
-			if (ft_strlen(fil->p_str) > par->p_par)
-				par->p_par = ft_strlen(fil->p_str);
 			if (sizelen(fil->h_links) > par->h_par)
 				par->h_par = sizelen(fil->h_links);
 			if (ft_strlen(fil->u_name) > par->u_par)

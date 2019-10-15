@@ -18,6 +18,7 @@ typedef struct      s_filedata
 	char            *l_name;
 	char            *p_str;
 	char            *t_name;
+	char            *path;
 	nlink_t			h_links;
 	struct timespec	mtime;
 	struct timespec atime;
@@ -27,7 +28,6 @@ typedef struct      s_filedata
 
 typedef struct 			s_par
 {
-    int             p_par;
     int             h_par;
 	int 			u_par;
 	int				g_par;
@@ -36,5 +36,6 @@ typedef struct 			s_par
 
 
 int ft_ls(t_argdata *args);
+char *create_path(char *l, char *r);
 
 #endif

@@ -66,7 +66,7 @@ void		free_fileslst(t_list *flist)
 	free(flist);
 }
 
-void		fill_data(t_filedata *dst, struct stat *buff, char *name)
+void		fill_data(t_filedata *dst, struct stat *buff, char *name, char *path)
 {
 	dst->name = ft_strdup(name);
 	dst->group_id = buff->st_gid;
@@ -78,6 +78,7 @@ void		fill_data(t_filedata *dst, struct stat *buff, char *name)
 	dst->atime = buff->st_atimespec;
 	dst->mtime = buff->st_mtimespec;
 	dst->ctime = buff->st_ctimespec;
+	dst->path = path;
 }
 
 t_list_node	*create_filenode(char *path, char *name)
@@ -97,7 +98,7 @@ t_list_node	*create_filenode(char *path, char *name)
 	res = ft_memalloc(sizeof(t_list_node));
 	res->content_size = sizeof(t_filedata);
 	res->content = malloc(sizeof(t_filedata));
-	fill_data(res->content, &buff, name);
+	fill_data(res->content, &buff, name, tmp_str);
 	return (res);
 }
 
