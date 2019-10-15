@@ -19,6 +19,7 @@
 
 #include <time.h>
 #include <limits.h>
+#include <sys/xattr.h>
 #include "ft_printf.h"
 
 static char firts_char(mode_t mode)
@@ -39,27 +40,33 @@ static char firts_char(mode_t mode)
         return ('-');
 }
 
-// static char therd_char(mode_t mode)
-// {
-//
-// }
+ static void sst_char(mode_t mode, char *res)
+ {
+     if (mode & S_ISVTX)
+         res[9] = res[9] == '-' ? 'T' : 't';
+     if (mode & S_ISGID)
+         res[6] = res[6] == '-' ? 'S' : 's';
+     if (mode & S_ISUID)
+         res[3] = res[3] == '-' ? 'S' : 's';
+ }
 
-static char *get_mode_string(mode_t mode)
+static char *get_mode_string(t_filedata *f)
 {
     char *res;
 
     res = malloc(11);
-    res[0] = firts_char(mode);
-    res[1] = mode & S_IRUSR ? 'r' : '-';
-    res[2] = mode & S_IWUSR ? 'w' : '-';
-    res[3] = mode & S_IXUSR ? 'x' : '-';
-    res[4] = mode & S_IRGRP ? 'r' : '-';
-    res[5] = mode & S_IWGRP ? 'w' : '-';
-    res[6] = mode & S_IXGRP ? 'x' : '-';
-    res[7] = mode & S_IROTH ? 'r' : '-';
-    res[8] = mode & S_IWOTH ? 'w' : '-';
-    res[9] = mode & S_IXOTH ? 'x' : '-';
-    if (mode & S_IFLNK)
+    res[0] = firts_char(f->premissions);
+    res[1] = f->premissions & S_IRUSR ? 'r' : '-';
+    res[2] = f->premissions & S_IWUSR ? 'w' : '-';
+    res[3] = f->premissions & S_IXUSR ? 'x' : '-';
+    res[4] = f->premissions & S_IRGRP ? 'r' : '-';
+    res[5] = f->premissions & S_IWGRP ? 'w' : '-';
+    res[6] = f->premissions & S_IXGRP ? 'x' : '-';
+    res[7] = f->premissions & S_IROTH ? 'r' : '-';
+    res[8] = f->premissions & S_IWOTH ? 'w' : '-';
+    res[9] = f->premissions & S_IXOTH ? 'x' : '-';
+    sst_char(f->premissions, res);
+    if (listxattr(f->name, NULL , 0, XATTR_NOFOLLOW))
     {
         res[10] = '@';
         res[11] = '\0';
@@ -106,18 +113,19 @@ void print_line(t_list_node *s, t_par *p)
 	while (s)
     {
 		pr = s->content;
+        pr->t_name = get_name_by_time(pr);
         if (now - pr->mtime.tv_sec > 15811200)
-            i = 16;
+            i = 15;
         else
-            i = 8;
+            i = 7;
         if (S_ISLNK(pr->premissions))
         {
-            ft_printf("%-*s %*d %-*s  %-*s  %*lld %.7s %.4s %s -> %s\n", p->p_par, pr->p_str,
+            ft_printf("%-*s %*d %-*s  %-*s  %*lld %.7s%1.5s %s -> %s\n", p->p_par, pr->p_str,
                    p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
                    pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name, pr->l_name);
         }
         else
-		    ft_printf("%-*s %*d %-*s  %-*s  %*lld %.7s %.4s %s\n", p->p_par, pr->p_str,
+		    ft_printf("%-*s %*d %-*s  %-*s  %*lld %.7s%1.5s %s\n", p->p_par, pr->p_str,
 			   p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
 			   pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name);
 		s = s->next;
@@ -163,15 +171,14 @@ void		print_files(t_list *files_list, uint32_t flags)
 		while (cur)
 		{
 			fil = cur->content;
-			fil->p_str = get_mode_string(fil->premissions);
+			fil->p_str = get_mode_string(fil);
 			if (S_ISLNK(fil->premissions))
             {
 
-                readlink(fil->name, fil->l_name, NAME_MAX);
+                readlink(fil->name, fil->l_name, 255);
             }
 			fil->u_name = get_name_by_uid(fil->user_id);
 			fil->g_name = get_name_by_gid(fil->group_id);
-			fil->t_name = get_name_by_time(fil);
 			if (ft_strlen(fil->p_str) > par->p_par)
 				par->p_par = ft_strlen(fil->p_str);
 			if (sizelen(fil->h_links) > par->h_par)
