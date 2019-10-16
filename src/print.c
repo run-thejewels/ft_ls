@@ -165,7 +165,6 @@ int         sizelen(long s)
 
 void		print_files(t_list *files_list, uint32_t flags)
 {
-	off_t 			s;
 	t_list_node	*cur;
 	t_filedata	*fil;
 	t_par       *par;
@@ -175,8 +174,7 @@ void		print_files(t_list *files_list, uint32_t flags)
 	cur = files_list->begin;
 	par = ft_memalloc(sizeof(t_par));
 	if (flags & F_L)
-	{
-		s = 0;
+    {
 		bl = 0;
 		while (cur)
 		{
@@ -197,15 +195,10 @@ void		print_files(t_list *files_list, uint32_t flags)
 				par->g_par = ft_strlen(fil->g_name);
 			if (sizelen(fil->size) > par->s_par)
 				par->s_par = sizelen(fil->size);
-			if (S_ISDIR(fil->premissions))
-			    bl += fil->blocks;
-			else
-			    s += fil->size;
+			bl += fil->blocks;
 			cur = cur->next;
 		}
-		s = s / 512 + (s % 512 != 0);
-		s += bl;
-		printf("total %lld\n", s);
+		printf("total %lld\n", bl);
 		print_line(files_list->begin, par);
 		free(par);
 	}
