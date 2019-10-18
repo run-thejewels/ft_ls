@@ -52,7 +52,11 @@ void		lst_sort(t_list *files_list,int (*f)(t_filedata *, t_filedata *), char rev
 		while (pmt->next)
 		{
 			if (f(pmt->content, pmt->next->content) * (rev ? -1 : 1) > 0)
-				swap_nodes(files_list, pmt, pmt->next);
+            {
+                swap_nodes(files_list, pmt, pmt->next);
+                if (tmp == pmt->prev)
+                    tmp = pmt;
+            }
 			else
 				pmt = pmt->next;
 		}
