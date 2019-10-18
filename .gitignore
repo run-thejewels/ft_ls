@@ -3,8 +3,6 @@
 !Makefile
 !CMakeLists.txt
 !src/
-!src/*
-!src/*/*
 !include/
-!include/*
+!lib/
 !author
