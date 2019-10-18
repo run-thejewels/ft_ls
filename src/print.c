@@ -69,7 +69,7 @@ static char *get_mode_string(t_filedata *f)
 {
     char *res;
 
-    res = malloc(12);
+    res = malloc(11);
     res[0] = firts_char(f->premissions);
     res[1] = f->premissions & S_IRUSR ? 'r' : '-';
     res[2] = f->premissions & S_IWUSR ? 'w' : '-';
@@ -81,7 +81,8 @@ static char *get_mode_string(t_filedata *f)
     res[8] = f->premissions & S_IWOTH ? 'w' : '-';
     res[9] = f->premissions & S_IXOTH ? 'x' : '-';
     sst_char(f->premissions, res);
-    attr_res10;
+
+    attr_res10(f, res);
     res[11] = '\0';
     return res;
 }
@@ -130,12 +131,12 @@ void print_line(t_list_node *s, t_par *p)
             i = 7;
         if (S_ISLNK(pr->premissions))
         {
-            ft_printf("%s%*d %-*s  %-*s  %*lld %.7s%1.5s %s -> %s\n", pr->p_str,
+            ft_printf("%s %*d %-*s  %-*s  %*lld %.7s%1.5s %s -> %s\n", pr->p_str,
                    p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
                    pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name, pr->l_name);
         }
         else
-		    ft_printf("%s%*d %-*s  %-*s  %*lld %.7s%1.5s %s\n", pr->p_str,
+		    ft_printf("%s %*d %-*s  %-*s  %*lld %.7s%1.5s %s\n", pr->p_str,
 			   p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
 			   pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name);
 		s = s->next;
@@ -182,8 +183,8 @@ void		print_files(t_list *files_list, uint32_t flags)
 			fil->p_str = get_mode_string(fil);
 			if (S_ISLNK(fil->premissions))
             {
-			    fil->l_name = (char*)malloc(fil->size + 1);
-                readlink(create_path(fil->path, fil->name), fil->l_name, fil->size);
+			    fil->l_name = (char*)malloc(NAME_MAX);
+                readlink(fil->path, fil->l_name, NAME_MAX);
             }
 			fil->u_name = get_name_by_uid(fil->user_id);
 			fil->g_name = get_name_by_gid(fil->group_id);

@@ -93,8 +93,8 @@ t_list_node	*create_filenode(char *path, char *name)
 		raise_error("Cannot read file!!!\n", 0);
 		return (NULL);
 	}
-	if (tmp_str != name)
-		free(tmp_str);
+	//if (tmp_str != name)
+	//	free(tmp_str);
 	res = ft_memalloc(sizeof(t_list_node));
 	res->content_size = sizeof(t_filedata);
 	res->content = malloc(sizeof(t_filedata));
@@ -157,6 +157,8 @@ void		ft_ls_recursive(char *path, t_filedata *file, uint32_t flags)
 	if (files)
 	{
 		sort_files(files, flags);
+//        if (flags & OF_PRINT_DIR)
+            printf("%s:\n", path_to_dir);
 		print_files(files, flags);
 		cur_file = files->begin;
 		while (cur_file)
@@ -165,7 +167,7 @@ void		ft_ls_recursive(char *path, t_filedata *file, uint32_t flags)
 			if (flags & F_RECURSIVE && tmp->premissions & (uint32_t)S_IFDIR &&
 				ft_strcmp(tmp->name, ".") && ft_strcmp(tmp->name, ".."))
 			{
-				printf("%s:\n", path_to_dir);
+				//printf("\n\n%s:\n", path_to_dir);
 				ft_ls_recursive(path_to_dir, tmp, flags);
 			}
 			cur_file = cur_file->next;
@@ -193,8 +195,8 @@ int			ft_ls(t_argdata *args)
 			print_file(tmp, args->flags);
 		else
 		{
-			if (args->flags & OF_PRINT_DIR)
-				printf("%s:\n", tmp->name);
+			//if (args->flags & OF_PRINT_DIR)
+			//	printf("%s:\n", tmp->name);
 			ft_ls_recursive("", tmp, args->flags);
 		}
 		cur_file_name = cur_file_name->next;
