@@ -32,7 +32,6 @@ typedef struct 			s_par
 	int 			u_par;
 	int				g_par;
 	int 			s_par;
-	int             l_par;
 }						t_par;
 
 

@@ -52,19 +52,17 @@ static char firts_char(mode_t mode)
          res[3] = res[3] == '-' ? 'S' : 's';
  }
 
- static char attr_res10(t_filedata *f)
+ static void attr_res10(t_filedata *f, char *res)
  {
-    ssize_t c;
-    acl_t   a;
+    char *path;
 
-    c = listxattr(f->path, NULL , 0, 0);
-    a = acl_get_file(f->path, ACL_TYPE_EXTENDED);
-     if (c > 0)
-         return ('@');
-     else if (a != NULL)
-         return ('+');
+    path = create_path(f->path, f->name);
+     if (listxattr(path, NULL , 0, XATTR_NOFOLLOW))
+         res[10] = '@';
+     else if (acl_get_file(path, ACL_TYPE_EXTENDED) != NULL)
+         res[10] = '+';
      else
-         return (' ');
+         res[10] = ' ';
  }
 
 static char *get_mode_string(t_filedata *f)
@@ -83,7 +81,7 @@ static char *get_mode_string(t_filedata *f)
     res[8] = f->premissions & S_IWOTH ? 'w' : '-';
     res[9] = f->premissions & S_IXOTH ? 'x' : '-';
     sst_char(f->premissions, res);
-    res[10] = attr_res10(f);
+    attr_res10;
     res[11] = '\0';
     return res;
 }
@@ -132,12 +130,9 @@ void print_line(t_list_node *s, t_par *p)
             i = 7;
         if (S_ISLNK(pr->premissions))
         {
-            pr->l_name = (char*)malloc(pr->size + 1);
-            p->l_par = readlink(pr->path, pr->l_name, pr->size);
-            ft_printf("%s%*d %-*s  %-*s  %*lld %.7s%1.5s %s -> %*s\n", pr->p_str,
+            ft_printf("%s%*d %-*s  %-*s  %*lld %.7s%1.5s %s -> %s\n", pr->p_str,
                    p->h_par, pr->h_links ,p->u_par, pr->u_name, p->g_par,
-                   pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name, p->l_par, pr->l_name);
-            free(pr->l_name);
+                   pr->g_name, p->s_par, pr->size, pr->t_name, pr->t_name + i, pr->name, pr->l_name);
         }
         else
 		    ft_printf("%s%*d %-*s  %-*s  %*lld %.7s%1.5s %s\n", pr->p_str,
@@ -185,6 +180,11 @@ void		print_files(t_list *files_list, uint32_t flags)
 		{
 			fil = cur->content;
 			fil->p_str = get_mode_string(fil);
+			if (S_ISLNK(fil->premissions))
+            {
+			    fil->l_name = (char*)malloc(fil->size + 1);
+                readlink(create_path(fil->path, fil->name), fil->l_name, fil->size);
+            }
 			fil->u_name = get_name_by_uid(fil->user_id);
 			fil->g_name = get_name_by_gid(fil->group_id);
 			if (sizelen(fil->h_links) > par->h_par)

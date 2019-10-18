@@ -1,6 +1,0 @@
-/Users/kbethany/Desktop/ver/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/Users/kbethany/Desktop/ver/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/kbethany/Desktop/ver/cmake-build-debug/CMakeFiles/ft_ls.dir
-/Users/kbethany/Desktop/ver/cmake-build-debug/lib/libft/CMakeFiles/rebuild_cache.dir
-/Users/kbethany/Desktop/ver/cmake-build-debug/lib/libft/CMakeFiles/edit_cache.dir
-/Users/kbethany/Desktop/ver/cmake-build-debug/lib/libft/CMakeFiles/libft.dir
