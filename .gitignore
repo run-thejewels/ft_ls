@@ -1,0 +1,10 @@
+*
+!.gitignore
+!Makefile
+!CMakeLists.txt
+!src/
+!src/*
+!src/*/*
+!include/
+!include/*
+!author
