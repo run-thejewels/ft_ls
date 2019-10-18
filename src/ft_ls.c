@@ -78,7 +78,7 @@ void		fill_data(t_filedata *dst, struct stat *buff, char *name, char *path)
 	dst->atime = buff->st_atimespec;
 	dst->mtime = buff->st_mtimespec;
 	dst->ctime = buff->st_ctimespec;
-	dst->path = path;
+	dst->path = create_path(path, name);
 }
 
 t_list_node	*create_filenode(char *path, char *name)
