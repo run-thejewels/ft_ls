@@ -1,14 +1,21 @@
-//
-// Created by Jasper Leann on 09/10/2019.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   sorts.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kbethany <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/10/19 18:09:15 by kbethany          #+#    #+#             */
+/*   Updated: 2019/10/19 18:13:35 by kbethany         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_list.h"
 #include "ft_ls.h"
-#include "arg_parser.h"
 #include "ft_string.h"
 
-void        swap_nodes(t_list *lst, t_list_node *l, t_list_node *r)
+static void		swap_nodes(t_list *lst, t_list_node *l, t_list_node *r)
 {
-
 	if (l->prev)
 		l->prev->next = r;
 	else
@@ -19,29 +26,15 @@ void        swap_nodes(t_list *lst, t_list_node *l, t_list_node *r)
 		lst->end = l;
 	l->next = r->next;
 	r->next = l;
-	r->prev = l ->prev;
+	r->prev = l->prev;
 	l->prev = r;
 }
 
-int         time_sort(t_filedata *a, t_filedata *b)
+static void		lst_sort(t_list *files_list,
+				int (*f)(t_filedata *, t_filedata *), char rev)
 {
-	return ((int)(a->cur_time.tv_sec -  b->cur_time.tv_sec));
-}
-
-int         size_sort(t_filedata *a, t_filedata *b)
-{
-	return ((int)(b->size - a->size));
-}
-
-int         name_sort(t_filedata *a, t_filedata *b)
-{
-	return(ft_strcmp(a->name, b->name));
-}
-
-void		lst_sort(t_list *files_list,int (*f)(t_filedata *, t_filedata *), char rev)
-{
-	t_list_node *tmp;
-	t_list_node *pmt;
+	t_list_node	*tmp;
+	t_list_node	*pmt;
 
 	tmp = files_list->end;
 	while (tmp)
@@ -50,11 +43,11 @@ void		lst_sort(t_list *files_list,int (*f)(t_filedata *, t_filedata *), char rev
 		while (pmt->next)
 		{
 			if (f(pmt->content, pmt->next->content) * (rev ? -1 : 1) > 0)
-            {
-                swap_nodes(files_list, pmt, pmt->next);
-                if (tmp == pmt->prev)
-                    tmp = pmt;
-            }
+			{
+				swap_nodes(files_list, pmt, pmt->next);
+				if (tmp == pmt->prev)
+					tmp = pmt;
+			}
 			else
 				pmt = pmt->next;
 		}
@@ -62,12 +55,11 @@ void		lst_sort(t_list *files_list,int (*f)(t_filedata *, t_filedata *), char rev
 	}
 }
 
-void        sort_files(t_list *files_list, uint32_t flags)
+void			sort_files(t_list *files_list, uint32_t flags)
 {
 	lst_sort(files_list, name_sort, flags & F_REVERSE);
-    if (flags & F_SIZE)
-        lst_sort(files_list, size_sort, flags & F_REVERSE);
+	if (flags & F_SIZE)
+		lst_sort(files_list, size_sort, flags & F_REVERSE);
 	if (flags & F_MTIME || flags & F_CTIME || flags & F_ATIME)
-		lst_sort(files_list, time_sort, flags & F_REVERSE);
+		lst_sort(files_list, mtime_sort, flags & F_REVERSE);
 }
-

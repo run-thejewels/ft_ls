@@ -18,6 +18,7 @@
 #include <ft_ls.h>
 #include <libft.h>
 #include <errno.h>
+#include <ft_printf.h>
 
 t_list		*get_files_in_dir(char *path, uint32_t flags, char fatal)
 {
@@ -83,8 +84,6 @@ void		ft_ls_recursive(char *path, t_filedata *file,
 {
 	t_list		*files;
 	char		*path_to_dir;
-	t_list_node	*cur_file;
-	t_filedata	*tmp;
 
 	path_to_dir = path[0] ? create_path(path, file->name) : file->name;
 	files = get_files_in_dir(path_to_dir, flags, fatal);
@@ -92,7 +91,7 @@ void		ft_ls_recursive(char *path, t_filedata *file,
 	{
 		sort_files(files, flags);
 		if (flags & OF_PRINT_DIR)
-			printf("\n%s:\n", path_to_dir);
+			ft_printf("\n%s:\n", path_to_dir);
 		else
 			flags |= is_print_dir(files) ? OF_PRINT_DIR : 0;
 		print_files(files, flags);

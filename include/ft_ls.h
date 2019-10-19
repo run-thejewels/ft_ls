@@ -57,5 +57,14 @@ int					is_print_dir(t_list *lst);
 void				free_fileslst(t_list *flist);
 t_list_node			*create_filenode(char *path, char *name,
 						uint32_t flags, char fatal);
-
+int					mtime_sort(t_filedata *a, t_filedata *b);
+int					size_sort(t_filedata *a, t_filedata *b);
+int					name_sort(t_filedata *a, t_filedata *b);
+void				sort_files(t_list *files_list, uint32_t flags);
+void				print_files(t_list *files_list, uint32_t flags);
+void				print_file(t_filedata *file, uint32_t flags);
+char				*get_name_by_uid(uid_t uid);
+char				*get_name_by_gid(gid_t gid);
+char				*get_name_by_time(t_filedata *s);
+char				*get_mode_string(t_filedata *f);
 #endif
