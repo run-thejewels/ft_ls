@@ -19,7 +19,6 @@
 #include <libft.h>
 #include <errno.h>
 
-char		*create_path(char *l, char *r);
 void		raise_error(const char *msg, char fatal);
 void		sort_files(t_list *files_list, uint32_t flags);
 void		print_file(t_filedata *file, uint32_t flags);
@@ -97,6 +96,7 @@ t_list_node	*create_filenode(char *path, char *name, char fatal)
 	res = ft_memalloc(sizeof(t_list_node));
 	res->content_size = sizeof(t_filedata);
 	res->content = malloc(sizeof(t_filedata));
+	ft_bzero(res->content, sizeof(t_filedata));
 	fill_data(res->content, &buff, name, tmp_str);
 	if (tmp_str != name)
 		free(tmp_str);
@@ -147,7 +147,7 @@ t_list		*get_files_by_name(t_list *filenames)
 }
 
 void		ft_ls_recursive(char *path, t_filedata *file,
-							uint32_t flags, int fatal)
+							uint32_t flags, char fatal)
 {
 	t_list		*files;
 	char		*path_to_dir;

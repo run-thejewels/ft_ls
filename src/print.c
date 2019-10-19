@@ -54,22 +54,34 @@ static char firts_char(mode_t mode)
 
  static void attr_res10(t_filedata *f, char *res)
  {
-    char *path;
+	acl_t	tmp;
+	ssize_t ret;
 
-    path = create_path(f->path, f->name);
-     if (listxattr(path, NULL , 0, XATTR_NOFOLLOW))
-         res[10] = '@';
-     else if (acl_get_file(path, ACL_TYPE_EXTENDED) != NULL)
-         res[10] = '+';
-     else
-         res[10] = ' ';
+
+	if (( tmp = acl_get_file(f->path, ACL_TYPE_EXTENDED)) != NULL)
+		res[10] = '+';
+	else if (errno == 2)
+		errno = 0;
+	else
+		perror(strerror(errno));
+	acl_free(tmp);
+
+	 if ((ret = listxattr(f->path, NULL , 0, XATTR_NOFOLLOW)) < 0)
+	 {
+		 errno = 0;
+		 return ;
+	 }
+	 if (ret > 0)
+	 {
+		 res[10] = '@';
+	 }
  }
 
 static char *get_mode_string(t_filedata *f)
 {
     char *res;
 
-    res = malloc(11);
+    res = malloc(12);
     res[0] = firts_char(f->premissions);
     res[1] = f->premissions & S_IRUSR ? 'r' : '-';
     res[2] = f->premissions & S_IWUSR ? 'w' : '-';
@@ -145,10 +157,11 @@ void print_line(t_list_node *s, t_par *p)
 
 void		print_file(t_filedata *file, uint32_t flags)
 {
+	(void)flags;
 	printf("%s ", file->name);
 }
 
-int         sizelen(long s)
+uint32_t	sizelen(long s)
 {
 	int i;
 	long k;

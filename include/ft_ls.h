@@ -26,13 +26,13 @@ typedef struct      s_filedata
 }                   t_filedata;
 
 
-typedef struct 			s_par
+typedef struct	s_par
 {
-    int             h_par;
-	int 			u_par;
-	int				g_par;
-	int 			s_par;
-}						t_par;
+    uint32_t	h_par;
+	uint32_t	u_par;
+	uint32_t	g_par;
+	uint32_t	s_par;
+}				t_par;
 
 
 int ft_ls(t_argdata *args);
