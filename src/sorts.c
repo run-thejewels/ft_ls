@@ -25,9 +25,7 @@ void        swap_nodes(t_list *lst, t_list_node *l, t_list_node *r)
 
 int         time_sort(t_filedata *a, t_filedata *b)
 {
-	(void)a;
-	(void)b;
-	return (0);
+	return (a->mtime.tv_sec -  b->mtime.tv_sec);
 }
 
 int         size_sort(t_filedata *a, t_filedata *b)
