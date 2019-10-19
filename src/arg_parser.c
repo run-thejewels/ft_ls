@@ -10,12 +10,20 @@ static unsigned            get_basic_flag(char c)
 		return (F_L);
 	else if (c == 'r')
 		return (F_REVERSE);
-	else if (c == 't')
-		return (F_TIME);
 	else if (c == 'R')
 		return (F_RECURSIVE);
 	else if (c == 'a')
 		return (F_ALL);
+	else if (c == 'c')
+		return (F_MTIME);
+	else if (c == 'T')
+		return (F_SIZE);
+	else if (c == 't')
+		return (F_MTIME);
+	else if (c == 'u')
+		return (F_ATIME);
+	else if (c == 'U')
+		return (F_CTIME);
 	return (0);
 }
 

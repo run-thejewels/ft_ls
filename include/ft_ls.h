@@ -23,6 +23,7 @@ typedef struct      s_filedata
 	struct timespec	mtime;
 	struct timespec atime;
 	struct timespec	ctime;
+	struct timespec	cur_time;
 }                   t_filedata;
 
 

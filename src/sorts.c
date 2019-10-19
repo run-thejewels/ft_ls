@@ -25,7 +25,7 @@ void        swap_nodes(t_list *lst, t_list_node *l, t_list_node *r)
 
 int         time_sort(t_filedata *a, t_filedata *b)
 {
-	return (a->mtime.tv_sec -  b->mtime.tv_sec);
+	return ((int)(a->cur_time.tv_sec -  b->cur_time.tv_sec));
 }
 
 int         size_sort(t_filedata *a, t_filedata *b)
@@ -61,12 +61,13 @@ void		lst_sort(t_list *files_list,int (*f)(t_filedata *, t_filedata *), char rev
 		tmp = tmp->prev;
 	}
 }
+
 void        sort_files(t_list *files_list, uint32_t flags)
 {
 	lst_sort(files_list, name_sort, flags & F_REVERSE);
-//    if (flags & F_TIME)
-//        lst_sort(files_list, time_sort, flags & F_REVERSE);
-	if (flags & F_TIME)
-		lst_sort(files_list, size_sort, flags & F_REVERSE);
+    if (flags & F_SIZE)
+        lst_sort(files_list, size_sort, flags & F_REVERSE);
+	if (flags & F_MTIME || flags & F_CTIME || flags & F_ATIME)
+		lst_sort(files_list, time_sort, flags & F_REVERSE);
 }
 

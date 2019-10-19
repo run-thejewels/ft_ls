@@ -75,13 +75,21 @@ void		fill_data(t_filedata *dst, struct stat *buff,
 	dst->size = buff->st_size;
 	dst->blocks = buff->st_blocks;
 	dst->h_links = buff->st_nlink;
-	dst->atime = buff->st_atimespec;
-	dst->mtime = buff->st_mtimespec;
-	dst->ctime = buff->st_ctimespec;
 	dst->path = ft_strdup(path);
 }
 
-t_list_node	*create_filenode(char *path, char *name, char fatal)
+struct timespec	get_time(struct stat *buff, uint32_t flags)
+{
+	if (flags & F_ATIME)
+		return (buff->st_atimespec);
+	else if (flags & F_MTIME)
+		return (buff->st_mtimespec);
+	else if (flags & F_CTIME)
+		return (buff->st_mtimespec);
+}
+
+
+t_list_node	*create_filenode(char *path, char *name, uint32_t flags, char fatal)
 {
 	struct stat		buff;
 	char			*tmp_str;
@@ -98,6 +106,7 @@ t_list_node	*create_filenode(char *path, char *name, char fatal)
 	res->content = malloc(sizeof(t_filedata));
 	ft_bzero(res->content, sizeof(t_filedata));
 	fill_data(res->content, &buff, name, tmp_str);
+	((t_filedata *)(res->content))->cur_time = get_time(&buff, flags);
 	if (tmp_str != name)
 		free(tmp_str);
 	return (res);
@@ -119,7 +128,7 @@ t_list		*get_files_in_dir(char *path, uint32_t flags, char fatal)
 	while ((cur_file = readdir(dir)))
 	{
 		if ((cur_file->d_name[0] != '.' || flags & F_ALL) &&
-			(tmp_node = create_filenode(path, cur_file->d_name, fatal)))
+			(tmp_node = create_filenode(path, cur_file->d_name, flags, fatal)))
 			ft_lstadd(files_list, tmp_node);
 	}
 	if (errno != 0)
@@ -131,7 +140,7 @@ t_list		*get_files_in_dir(char *path, uint32_t flags, char fatal)
 	return (files_list);
 }
 
-t_list		*get_files_by_name(t_list *filenames)
+t_list		*get_files_by_name(t_list *filenames, uint32_t flags)
 {
 	t_list		*res;
 	t_list_node	*cur_fname;
@@ -140,7 +149,7 @@ t_list		*get_files_by_name(t_list *filenames)
 	cur_fname = filenames->begin;
 	while (cur_fname)
 	{
-		ft_lstadd(res, create_filenode("", cur_fname->content, 1));
+		ft_lstadd(res, create_filenode("", cur_fname->content, flags, 1));
 		cur_fname = cur_fname->next;
 	}
 	return (res);
@@ -185,7 +194,7 @@ int			ft_ls(t_argdata *args)
 	t_list_node		*cur_file;
 	t_filedata		*tmp;
 
-	files = get_files_by_name(args->dirs);
+	files = get_files_by_name(args->dirs, args->flags);
 	args->flags |= is_print_dir(files) ? OF_PRINT_DIR : 0;
 	sort_files(files, args->flags);
 	cur_file = files->begin;
