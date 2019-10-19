@@ -28,6 +28,8 @@ typedef struct      s_filedata
 
 typedef struct	s_par
 {
+    quad_t      bl;
+    uint32_t    p_par;
     uint32_t	h_par;
 	uint32_t	u_par;
 	uint32_t	g_par;
