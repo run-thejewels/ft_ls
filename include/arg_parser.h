@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   arg_parser.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jleann <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/10/09 12:24:00 by jleann            #+#    #+#             */
+/*   Updated: 2019/10/09 12:24:03 by jleann           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef FT_LS_ARG_PARSER_H
 # define FT_LS_ARG_PARSER_H
 
@@ -13,12 +25,11 @@
 # define F_ATIME 256U
 # define F_CTIME 512U
 
-
 typedef struct		s_argdata
 {
 	t_list			*dirs;
-	unsigned        flags;
-}                    t_argdata;
+	unsigned		flags;
+}					t_argdata;
 
-t_argdata           *arg_parser(int argc, char **argv);
+t_argdata			*arg_parser(int argc, char **argv);
 #endif

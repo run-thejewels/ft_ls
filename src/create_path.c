@@ -1,10 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   create_path.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jleann <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/10/09 12:24:00 by jleann            #+#    #+#             */
+/*   Updated: 2019/10/09 12:24:03 by jleann           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <ft_string.h>
 
-char *create_path(char *l, char *r)
+char	*create_path(char *l, char *r)
 {
-	char *res;
+	char	*res;
+	size_t	l1;
+	size_t	l2;
 
-	size_t l1, l2;
 	l1 = ft_strlen(l);
 	l2 = ft_strlen(r);
 	res = malloc(l1 + l2 + 2);

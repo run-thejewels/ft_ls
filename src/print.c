@@ -123,7 +123,7 @@ static char *get_name_by_time(t_filedata *s)
 {
     char    *a;
 
-    a = ctime(&(s->mtime.tv_sec)) + 4;
+    a = ctime(&(s->cur_time.tv_sec)) + 4;
     return (a);
 
 }
@@ -135,7 +135,7 @@ void print_l(t_filedata *pr, t_par *p)
 
     now = time (NULL);
     pr->t_name = get_name_by_time(pr);
-    if (now - pr->mtime.tv_sec > 15811200)
+    if (now - pr->cur_time.tv_sec > 15811200)
         i = 15;
     else
         i = 7;

@@ -1,11 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   arg_parser.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jleann <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/10/09 12:24:00 by jleann            #+#    #+#             */
+/*   Updated: 2019/10/09 12:24:03 by jleann           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "arg_parser.h"
 #include "ft_list.h"
 #include "ft_string.h"
 #include <stdio.h>
 
-static unsigned            get_basic_flag(char c)
+static unsigned		get_basic_flag(char c)
 {
-
 	if (c == 'l')
 		return (F_L);
 	else if (c == 'r')
@@ -27,7 +38,7 @@ static unsigned            get_basic_flag(char c)
 	return (0);
 }
 
-static void	raise_error(const char *msg, int code, const char opt)
+static void			raise_error(const char *msg, int code, const char opt)
 {
 	if (opt)
 		dprintf(2, msg, opt);
@@ -36,10 +47,10 @@ static void	raise_error(const char *msg, int code, const char opt)
 	exit(code);
 }
 
-static unsigned            get_flags(char *str)
+static unsigned		get_flags(char *str)
 {
-	unsigned    res;
-	unsigned    tmp;
+	unsigned	res;
+	unsigned	tmp;
 	size_t		cur;
 
 	cur = 0;
@@ -55,10 +66,10 @@ static unsigned            get_flags(char *str)
 	return (res);
 }
 
-t_argdata           *arg_parser(int argc, char **argv)
+t_argdata			*arg_parser(int argc, char **argv)
 {
-	t_argdata   *res;
-	int         cur_arg;
+	t_argdata	*res;
+	int			cur_arg;
 
 	res = malloc(sizeof(t_argdata));
 	res->dirs = ft_lstinit();
